@@ -8,9 +8,11 @@ package fem.divider.figure;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import fem.divider.RectangleArea;
 import fem.divider.figure.command.CommandStack;
 
 /** Basic 
@@ -26,7 +28,7 @@ public class Figure {
 
 		public void draw(Graphics2D graphics)
 		{
-				for(Iterator i=contours.iterator(); i.hasNext(); )
+				for(Iterator<Contour> i=contours.iterator(); i.hasNext(); )
 				{
 						((Contour)i.next()).draw(graphics);
 				}
@@ -40,7 +42,7 @@ public class Figure {
 		public Segment findSegment(double x_, double y_, double handle_)
 		{
 				Segment segment;
-				for(Iterator i=contours.iterator(); i.hasNext(); )
+				for(Iterator<Contour> i=contours.iterator(); i.hasNext(); )
 				{
 						segment = ((Contour)i.next()).findSegment(x_, y_, handle_);
 						if(segment!=null) return segment;
@@ -67,9 +69,11 @@ public class Figure {
       }
       public void setContours(List<Contour> contours_) {
          contours = contours_;
+         sortContours();
       }
       public void addContour(Contour contour) {
          contours.add(contour);
+         sortContours();
       }
 		public int contoursCount() {
 		   return contours.size();
@@ -79,6 +83,63 @@ public class Figure {
 		}
 		//=========================== end ===============================
    
+		/**
+		 * Sort Contours in order of increasing area
+		 * If outer (bigger) contour meshing first - it will overlap smaller
+		 */
+		public void sortContours(){
+			int N = contoursCount();
+			double[] areas = new double[ N ];
+			int pointer = 0;
+			for( Contour contour : contours ){
+				RectangleArea ra = contour.calculateBounds();
+				double approxArea = ra.getWidth() * ra.getHeight(); //TODO: will not work properly on star-like figures
+				areas[pointer++] = approxArea;
+			}
+			
+			if( N == 2 && areas[0] > areas[1] ){
+				Contour tmp = contours.get(1);
+				contours.set( 1, contours.get(0) );
+				contours.set( 0, tmp );
+			} else {
+				boolean need_sort = false;
+				double prev_area = Double.NEGATIVE_INFINITY;
+				for( double area : areas ) {
+					if( prev_area > area ){
+						need_sort = true;
+						break;
+					} else {
+						prev_area = area;
+					}
+				}
+				if( !need_sort ){
+					return;
+				}
+						
+				// sorting
+				int[] indexes = new int[ N ];
+				int pos = -1;
+				double min_val = Double.POSITIVE_INFINITY;
+				for( int i = 0; i < N-1; i++ ){
+					for( int j = i; j < N; j++ ){
+						if( areas[j] < min_val ){
+							min_val = areas[j];
+							pos = j;
+						}
+					}
+					double tmp = areas[pos];
+					areas[pos] = areas[i];
+					areas[i] = tmp;			
+					indexes[i] = pos;
+				}
+				List<Contour> new_contours = new ArrayList<Contour>(N);
+				int increase = 0;
+				for( int i : indexes ){
+					new_contours.add( increase++, contours.get(i) );
+				}
+				contours = new_contours;
+			}
+		}
 		
 		public fem.divider.RectangleArea calculateBounds()
 		{

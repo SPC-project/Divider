@@ -2,18 +2,23 @@ Changelog
 =======
 
 **v2.6a**
-Original [program](https://github.com/paul-lysak/divider), created by Paul Lysak.
+Оригинальная [программа](https://github.com/paul-lysak/divider), написанная Павлом Лысаком.
 
 **v2.6b**
-- Add additional package hierarchy level - *fem*, add subpackeges *geometry*, *apacker*, *common*
-	* *geometry* absorb *Dot* and *Line* classes
-	* *common* hold some project settings (e.g. program version)
-- Start file-chooser dialog from current directory
+- добавлен дополнительны иерархический уровень - *fem*; созданные новые пакеты *geometry*, *apacker*, *common*
+	* *geometry* поглотили классы *Dot* и *Line*; в нем создан *Triangle* - абстракция для Element
+	* В *common* перемещены некоторые константы (например, текущая версия)
+- Диалог выбора файла стартует из текущей директории 
 
 **v2.7**
-- Refactoring the *DPacker* code
-- Add 'material' to *geometry.Dot*: modify *divider.mesh.NodeEditDialog* (change 'material' by GUI) and *divider.figure.DFig* (make 'material' save/load), modify *divider.figure.Node* for different color marking
-- Fix 'out of boundary' error in *divider.figure.Contour* in method addToEnd 
+- Рефакториг пакета *DPacker*
+- Добавлено свойство 'материал' с соответствующими модификациями по коду
+- Исправлен ошибка 'out of boundary' в *divider.figure.Contour* в методе *addToEnd* 
 
 **v2.7a**
-- Suggest middle point for new node, when split a segment
+- Новая опция в выпадающем меню сегмента: создать точку в середине сегмента
+- Закрашивать область фигуры серым (и соответствующий checkbox в View)
+- В меню генерации узлов между координатами можно перемещаться по Tab
+- Исправлена ошибка наслоения при создании обрамляющего контура раньше вложенного в него
+- Исправлена ошибка с растворением границ вложенного контура
+- Воздушную рамку теперь можно создать и масштабирование контура

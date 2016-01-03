@@ -7,21 +7,16 @@
 package fem.divider.mesh;
 
 import fem.common.IFemSettings;
+import fem.divider.Divider;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Paint;
-
 import fem.geometry.Dot;
 import fem.geometry.DotMaterial;
 import fem.geometry.Triangle;
 
-/**
- *
- * @author  gefox
- * @version 
- */
 public class Element extends Triangle {
-	 private int index; //index in array of elements in mesh
+	private int index; //index in array of elements in mesh
     private Mesh mesh;
     private boolean valid = true;
 
@@ -29,13 +24,14 @@ public class Element extends Triangle {
     public static double OUTER_UPGRADE_ANGLE = Math.toRadians(20);
 
     public static Color elementNumberColor = new Color(0, 100, 0);
-	 public static Color airElementColor    = new Color(43, 127, 176);
-	 public static Color elementInnerColor  = new Color(128, 128, 128, 50);
+    public static Color airElementColor    = new Color(43, 127, 176);
+    public static Color elementInnerColor  = new Color(128, 128, 128, 50);
 
 		/** Creates new Element
 		 * and adds it to mesh of given node
 		 */
     public Element(Node A_, Node B_, Node C_) {
+    	// TODO Check if some of Nodes is equal
        super( A_, B_, C_ );
        mesh = A_.mesh;
        A_.add(this);
@@ -46,7 +42,7 @@ public class Element extends Triangle {
 
 	 private void drawSide( Node start, Node end, Graphics2D g ){
 	     Color col = g.getColor();
-		  if( start.material == DotMaterial.AIR || end.material == DotMaterial.AIR )
+		  if( start.getMaterial() == DotMaterial.AIR || end.getMaterial() == DotMaterial.AIR )
             g.setPaint(airElementColor);
 		  else
 		     g.setPaint(Color.black);
@@ -55,13 +51,13 @@ public class Element extends Triangle {
                     mesh.panel.xsi( end.getX() ),   mesh.panel.ysi( end.getY() )    );
         g.setPaint(col);
 	 }
-	 private void drawTriangle( Node first, Node second, Node third, Graphics2D g ){
-	    if( !first.isFigure() || !second.isFigure() || !third.isFigure() )
+	 private void fillTriangle( Node first, Node second, Node third, Graphics2D g ){
+	    if( !isFigure() )
 	       return;
 	    int[] xPoints = { mesh.panel.xsi(first.getX()), mesh.panel.xsi(second.getX()), mesh.panel.xsi(third.getX()) };
 	    int[] yPoints = { mesh.panel.ysi(first.getY()), mesh.panel.ysi(second.getY()), mesh.panel.ysi(third.getY()) };
 	    g.setPaint(elementInnerColor);
-		 g.fillPolygon( xPoints, yPoints, 3 );
+		g.fillPolygon( xPoints, yPoints, 3 );
 	 }
     public void draw(Graphics2D g)
     {
@@ -69,8 +65,9 @@ public class Element extends Triangle {
        Node B = getNodes()[1];
        Node C = getNodes()[2];
        MeshPanel p = mesh.panel;
-						  
-       drawTriangle(A, B, C, g);
+					
+       if( Divider.getDivider().getPreferences().isFillFigureElements() )
+    	   fillTriangle(A, B, C, g);
        drawSide(A, B, g);
        drawSide(B, C, g);
        drawSide(C, A, g);
@@ -232,55 +229,6 @@ public class Element extends Triangle {
     	return true;
     }
 
-    private void drawFignu(Graphics2D g)
-    {
-                    MeshPanel p = mesh.panel;
-                    double A1, A2, B1, B2, C1, C2;
-                    //line 1 coefficients
-                    A1=getNodes()[1].getX()-getNodes()[0].getX();
-                    B1=getNodes()[1].getY()-getNodes()[0].getY();
-                    C1=A1*(getNodes()[1].getX()+getNodes()[0].getX())/2+B1*(getNodes()[1].getY()+getNodes()[0].getY())/2;
-                    //line 2 coefficients
-                    A2=getNodes()[2].getX()-getNodes()[0].getX();
-                    B2=getNodes()[2].getY()-getNodes()[0].getY();
-                    C2=A2*(getNodes()[2].getX()+getNodes()[0].getX())/2+B2*(getNodes()[2].getY()+getNodes()[0].getY())/2;
-
-                    //determinants
-                    double d = A1*B2-B1*A2;
-                    double dx = C1*B2-B1*C2;
-                    double dy = A1*C2-C1*A2;
-
-                    double x = dx/d;
-                    double y = dy/d;
-
-                    double x1, y1, x2, y2;
-                    x1=-100;
-                    y1 = (-A1*x1+C1)/B1;
-                    x2=100;
-                    y2 = (-A1*x2+C1)/B1;
-                    Paint paint = g.getPaint();
-                    g.setPaint(Color.yellow);
-                    g.drawLine( p.xsi(x1), p.ysi(y1), p.xsi(x2), p.ysi(y2));
-                    x1=-100;
-                    y1 = (-A1*x1+C1)/B1;
-                    x2=100;
-                    y2 = (-A1*x2+C1)/B1;
-                    g.drawLine( p.xsi(x1), p.ysi(y1), p.xsi(x2), p.ysi(y2));
-                    g.setPaint(paint);
-    }
-
-
-    private boolean isGood()
-    {
-                    double s = getArea();
-                    if(s>mesh.settings.maxArea) return false; //too big
-                    if(s<mesh.settings.minArea) return true; //too small to care about :-)
-                    double a = Math.min( Math.min(getAngleValue(0), getAngleValue(1)), getAngleValue(2));
-                    if(a<mesh.settings.getMinAngle()) return false; //has too small angle
-                    return true; // nothing specital found
-    }
-
-
     /**
      * Get third node of element or null 
      * 
@@ -304,22 +252,21 @@ public class Element extends Triangle {
      * Split element info smaller elements.
 	  * If needed result[1] has added elements 
      * If these was no upgrade returns zero-size array
-     * @returns two-dimension array: result[0] has removed elements, 
+     * @returns true - if the element upgraded
      */
     public boolean upgrade()
     {
-       boolean isNeedUpgrade = valid && ( 
-               getArea() < mesh.settings.maxArea*areaShrink() 
-               && getAngleValue(getMinAngleIndex()) > mesh.settings.getMinAngle());
-       if( isNeedUpgrade || getArea() < mesh.settings.minArea)
-         return false; //area OK
-
-
-       boolean isOuter = !isInside(circleCenter()) || getAngleValue(getMinAngleIndex()) < OUTER_UPGRADE_ANGLE;
-       if( isOuter )
-           return outerUpgrade();
-       else
-           return innerUpgrade();
+    	boolean isNeedUpgrade = valid && ( 
+    			getArea() < mesh.settings.maxArea*areaShrink() 
+    			&& getAngleValue(getMinAngleIndex()) > mesh.settings.getMinAngle());
+    	if( isNeedUpgrade || getArea() < mesh.settings.minArea)
+    		return false; //area OK
+    	
+    	boolean isOuter = !isInside(circleCenter()) || getAngleValue(getMinAngleIndex()) < OUTER_UPGRADE_ANGLE;
+    	if( isOuter )
+    		return outerUpgrade();
+    	else
+    		return innerUpgrade();
     }
 
     /**
@@ -330,12 +277,9 @@ public class Element extends Triangle {
         Dot cdot = getCentralDot();
         Node cnode = new Node(mesh, cdot);
         
-        @SuppressWarnings("unused")
-        Triangle el1 = new Element(getNodes()[0], getNodes()[1], cnode);
-        @SuppressWarnings("unused")
-        Triangle el2 = new Element(getNodes()[1], getNodes()[2], cnode);
-        @SuppressWarnings("unused")
-        Triangle el3 = new Element(getNodes()[2], getNodes()[0], cnode);
+        mesh.createElement(getNodes()[0], getNodes()[1], cnode);
+        mesh.createElement(getNodes()[1], getNodes()[2], cnode);
+        mesh.createElement(getNodes()[2], getNodes()[0], cnode);
         this.delete();
         
         cnode.lawson();
@@ -366,16 +310,16 @@ public class Element extends Triangle {
        }
 
        // Split opposite to 'nodeMax' edge in middle point
-		 Node nodeMid = new Node(node1, node2, 0.5, op4==null?true:false ); 
-       Triangle el1 = new Element(nodeMid, node2, nodeMax);
-       Triangle el2 = new Element(nodeMid, nodeMax, node1);
+       Node nodeMid = new Node(node1, node2, 0.5, op4==null?true:false ); 
+       mesh.createElement(nodeMid, node2, nodeMax);
+       mesh.createElement(nodeMid, nodeMax, node1);
        this.delete();
 
        if(op4!=null){ //we have opposite element, let's split it too
           Node opTo_nodeMax = op4.getThirdNode(node1, node2);
 
-          Triangle op4el1 = new Element(opTo_nodeMax, node2, nodeMid);
-          Triangle op4el2 = new Element(nodeMid, node1, opTo_nodeMax);
+          mesh.createElement(opTo_nodeMax, node2, nodeMid);
+          mesh.createElement(nodeMid, node1, opTo_nodeMax);
 
           op4.delete();
        }
@@ -423,11 +367,21 @@ public class Element extends Triangle {
 		
     public boolean isFigure() {
 		Node[] nodes = getNodes();
+		
 		return nodes[0].isFigure() && nodes[1].isFigure() && nodes[2].isFigure();
 	 }            
                 
     public Node[] getNodes()
     {
     	return (Node[])getCorners();
+    }
+    
+    public boolean isSuchElement(Node first, Node second, Node third){
+    	Node[] mine = getNodes();
+    	if( first == mine[0] || first == mine[1] || first == mine[2] )
+    		if( second == mine[0] || second == mine[1] || second == mine[2] )
+    			if( third == mine[0] || third == mine[1] || third == mine[2] )
+    				return true;
+    	return false;
     }
 }//end class

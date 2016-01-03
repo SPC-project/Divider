@@ -13,7 +13,6 @@ import java.util.Iterator;
  */
 public class TempStreamer extends AbstractStreamer {
         
-    @Override
     public void write() {
         int node = 1;
         for(Iterator<Double> i = getModelFacace().getNodalTemperature().iterator(); i.hasNext(); )

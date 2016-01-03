@@ -18,7 +18,6 @@ import fem.divider.figure.CZone;
 import fem.divider.figure.Contour;
 import fem.divider.figure.Figure;
 import fem.geometry.Dot;
-import fem.geometry.DotMaterial;
 import fem.geometry.Triangle;
 
 /**
@@ -50,6 +49,10 @@ public class Mesh {
 				return mesh;
 		}
 		
+		public void createElement( Node A, Node B, Node C ){
+			@SuppressWarnings("unused")
+			Element newOne = new Element(A, B, C); // Add this element to Mesh of Node A in newOne's constructor
+		}
 		public void draw(Graphics2D g)
 		{
 				g.setPaint(cMesh);
@@ -106,6 +109,32 @@ public class Mesh {
 		{
 				return elements.remove(element);
 		}
+		
+		/**
+		 * Connect Nodes by generating new Element
+		 * Called if first or second are no elements involved (unconnected to Figure)
+		 */
+		void fixUnconnectedNodes( Node first, Node second, ArrayList<ArrayList<Node>> traces ){
+			Node nearest = null;
+			double dist = Double.POSITIVE_INFINITY;
+			// find Node, nearest both to first and second (hope, that triangle will not overlap anything)
+			for( ArrayList<Node> contour : traces ){
+				for( Node nod : contour ){
+					if( nod == first || nod == second )
+						continue;
+					double x = nod.getX();
+					double y = nod.getY();
+					double d = Math.abs(x - first.getX()) + Math.abs(y - first.getY() 
+							+ Math.abs(x - second.getX()) + Math.abs(y - second.getY()) ); // Euclidian too expensive, I think 
+					if( d < dist ) { 
+						nearest = nod;
+						dist = d;
+					}
+				}
+			}
+			
+			createElement(first, nearest, second);
+		}
 
 		/**
 		 *Fix, if both Nodes is neighbors, but belong different Elements
@@ -113,7 +142,7 @@ public class Mesh {
 		 *@return true if fixing was done
 		 */
 		boolean fixEdge(Node thisNode, Node anotherNode)
-		{
+		{			
 			Element elOpposite;
 			for( Element thisNodeHolder : thisNode.elements )
 			{
@@ -131,12 +160,13 @@ public class Mesh {
 					return true;
 			}
 			
-			if( anotherNode.elements.size() < thisNode.elements.size() ){
+			if( anotherNode.elements.size() < thisNode.elements.size() ){ // decrease looping 
 				Node temp = anotherNode;
 				anotherNode = thisNode;
 				thisNode = temp;
 			}
 
+			// Fix half of the gap in the contour by new Element, created on thisNode, anotherNode and nearest to both of them
 			Node nearest = null;
 			double dist = Double.POSITIVE_INFINITY;
 			double thisDist;
@@ -154,8 +184,29 @@ public class Mesh {
 			         }
 			      }
 			}		
-			@SuppressWarnings("unused")
-         Element link = new Element(thisNode, nearest, anotherNode); 
+			createElement(thisNode, nearest, anotherNode); 
+			
+			// fix another half of the gap
+			outerLoop:
+			for( Element nearestHolder : nearest.elements ){
+				for( Node candidate : nearestHolder.getNodes() ){
+					if( candidate != anotherNode && candidate != thisNode && candidate != nearest ){
+						for( Element candidateHolder : candidate.elements ){
+							for( Node connection : candidateHolder.getNodes() ) {
+								if( connection == anotherNode ){
+									for( Element exist : candidate.elements ){
+										if( exist.isSuchElement(anotherNode, candidate, nearest) ) // this element already exist
+											break outerLoop;
+									}
+									createElement( anotherNode, candidate, nearest );
+									break outerLoop;
+								}
+							}
+						}
+					}
+				}
+			}
+			
 			return false;
 		}
 		
@@ -169,7 +220,6 @@ public class Mesh {
 				boolean in;
 				for(int i=elements.size()-1; i>=0; i--)//walk through elements
 				{
-//						System.out.println("i= "+i);
 						el = (Element)elements.get(i);
 						in=false;
 						for(int j=0; j<contours.size(); j++)//walk through contours
@@ -284,7 +334,6 @@ public class Mesh {
 		 */
 		public void sortNodes()
 		{
-			boolean x_wider; //true if mesh wider by x than by y
 			Node left_node, right_node, bottom_node, top_node, node;
 			int ni, nn;
 			nn=nodes.size();
@@ -302,16 +351,12 @@ public class Mesh {
 					if(node.getY()>top_node.getY()) top_node=node; 
 			}
 			
-			Comparator comparator;
+			Comparator<Node> comparator;
 			if( right_node.getX()-left_node.getX() > top_node.getY()-bottom_node.getY() )
 				{
-					x_wider=true; //mesh is wider by X
-					comparator = new Comparator()
+					comparator = new Comparator<Node>()
 					{
-						public int compare(Object a, Object b)
-						{
-							Node na, nb;
-							na=(Node)a; nb=(Node)b;
+						public int compare(Node na, Node nb) {
 							if( na.getX()<nb.getX() ) return -1;
 							if( na.getX()>nb.getX() ) return 1;
 							//x equals, compare y
@@ -322,13 +367,10 @@ public class Mesh {
 					};
 				} 
 				else 
-				{x_wider=false; //mesh is wider by Y
-					comparator = new Comparator()
+				{comparator = new Comparator<Node>()
 					{
-						public int compare(Object a, Object b)
+						public int compare(Node na, Node nb)
 						{
-							Node na, nb;
-							na=(Node)a; nb=(Node)b;
 							if( na.getY()<nb.getY() ) return -1;
 							if( na.getY()>nb.getY() ) return 1;
 							//x equals, compare y

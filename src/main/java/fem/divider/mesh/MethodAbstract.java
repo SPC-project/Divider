@@ -1,6 +1,3 @@
-/*
- * Created on 9/7/2006
- */
 package fem.divider.mesh;
 
 /**

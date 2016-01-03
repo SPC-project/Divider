@@ -87,7 +87,7 @@ public class Segment {
 	 *         from begin in segment direction
 	 */
 	public double shift_x(double offset) {
-		return geometry.shiftDot(this, offset).x;
+		return geometry.shiftDot(this, offset).getX();
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class Segment {
 	 *         from begin in segment direction
 	 */
 	public double shift_y(double offset) {
-		return geometry.shiftDot(this, offset).y;		
+		return geometry.shiftDot(this, offset).getY();		
 	}
 
 	public void setNewBegin(Node begin_) {
@@ -188,7 +188,7 @@ public class Segment {
 	 */
 	public double[] direction(double offset) {
 		Dot direction = geometry.getDirection(this, offset);
-		double vec[] = { direction.x, direction.y };
+		double vec[] = { direction.getX(), direction.getY() };
 
 		return vec;
 	}

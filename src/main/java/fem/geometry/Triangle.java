@@ -7,9 +7,9 @@ public class Triangle {
    private Dot corners[] = createCornersArray(); //new Dot[3];
    
    public Triangle( Dot A_, Dot B_, Dot C_ ){
-      corners[0] = A_;
-      corners[1] = B_;
-      corners[2] = C_;
+	   corners[0] = A_;
+	   corners[1] = B_;
+	   corners[2] = C_;
    }
 	
    /**
@@ -164,13 +164,13 @@ public class Triangle {
 	public Dot circleCenter() {		
 			double A1, A2, B1, B2, C1, C2;
 			//line 1 coefficients
-			A1=getCorners()[1].x-getCorners()[0].x;
-			B1=getCorners()[1].y-getCorners()[0].y;
-			C1=A1*(getCorners()[1].x+getCorners()[0].x)/2+B1*(getCorners()[1].y+getCorners()[0].y)/2;
+			A1=getCorners()[1].getX()-getCorners()[0].getX();
+			B1=getCorners()[1].getY()-getCorners()[0].getY();
+			C1=A1*(getCorners()[1].getX()+getCorners()[0].getX())/2+B1*(getCorners()[1].getY()+getCorners()[0].getY())/2;
 			//line 2 coefficients
-			A2=getCorners()[2].x-getCorners()[0].x;
-			B2=getCorners()[2].y-getCorners()[0].y;
-			C2=A2*(getCorners()[2].x+getCorners()[0].x)/2+B2*(getCorners()[2].y+getCorners()[0].y)/2;
+			A2=getCorners()[2].getX()-getCorners()[0].getX();
+			B2=getCorners()[2].getY()-getCorners()[0].getY();
+			C2=A2*(getCorners()[2].getX()+getCorners()[0].getX())/2+B2*(getCorners()[2].getY()+getCorners()[0].getY())/2;
 			
 			//determinants
 			double d = A1*B2-B1*A2;
@@ -180,7 +180,7 @@ public class Triangle {
 			double x = dx/d;
 			double y = dy/d;
 			
-			return new Dot(x,y);
+			return new Dot(x, y);
 	}
 
 
@@ -204,10 +204,10 @@ public class Triangle {
 	public Dot getCentralDot() {
 		Dot[] ds = getCorners();
 		DotMaterial dm = DotMaterial.FIGURE;
-		if( ds[0].material == DotMaterial.AIR || ds[1].material == DotMaterial.AIR || ds[2].material == DotMaterial.AIR )
+		if( ds[0].getMaterial() == DotMaterial.AIR || ds[1].getMaterial() == DotMaterial.AIR || ds[2].getMaterial() == DotMaterial.AIR )
 		   dm = DotMaterial.AIR;
 		
-		return new Dot( (ds[0].x+ds[1].x+ds[2].x)/3, (ds[0].y+ds[1].y+ds[2].y)/3, dm);
+		return new Dot( (ds[0].getX()+ds[1].getX()+ds[2].getX())/3, (ds[0].getY()+ds[1].getY()+ds[2].getY())/3, dm);
 	}
 
 	/**
@@ -219,8 +219,8 @@ public class Triangle {
 		// 	'A' is angle created by line <corners[0]-corners[1]-corners[2]>
 		// Express 'A': A = P-R, where P and R is angles that starts from OX-axis
 		// So: a*b*sin(P - R) -> simplify sin -> this formula
-		double s = (corners[0].x - corners[2].x)*(corners[1].y-corners[2].y)
-					- (corners[1].x - corners[2].x)*(corners[0].y-corners[2].y);
+		double s = (corners[0].getX() - corners[2].getX())*(corners[1].getY()-corners[2].getY())
+					- (corners[1].getX() - corners[2].getX())*(corners[0].getY()-corners[2].getY());
 		return 0.5*Math.abs(s);
 	}
 

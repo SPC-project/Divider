@@ -1,19 +1,26 @@
 Divider 
 =======
-#####(by students of [NTU "KhPI"](http://www.kpi.kharkov.ua/en/) [SPC](http://www.kpispu.info/en/about) department)
+#####(проект разрабатывается студентами кафедры [СПУ](http://www.kpispu.info/ru/about) [НТУ "ХПИ"](http://www.kpi.kharkov.ua/ru/))
+
+[English version of README](https://github.com/SPC-project/divider/blob/master/README_en.md)
 
 
-This is a Swing-based desktop application for preprocessing data for finite-element modeling of deformation and creep problems (started as [Paul Lysak's](https://github.com/paul-lysak/divider) graduate work). User can create some figure, build a mesh from it and apply edge conditions (forces and fixed points).
-This version is merging of Paul's v2.6a (completed in 2009) and path v2.6b (I didn't know his name yet) and my own changes (v2.7). See *doc/changes.md* (Russian, utf-8) for details.
+Это построенное на Swing приложение, предназначенное для подготовки данных для конечно-элементного моделирования деформирования и ползучести (начатое как магистерская работа [Павла Лысака](https://github.com/paul-lysak/divider)). Пользователь может построить фигуру и разбить её треугольниками. 
 
-How to run (by Unix terminal):
+Обратитесь к [doc/changes.md](https://github.com/SPC-project/divider/blob/master/doc/changes.md) чтобы просмотреть историю изменений.
+
+Инструкция по запуску
 ----------
-You'll need [Maven](https://maven.apache.org/) to build it.
+Для Unix-подобных систем, с установленным [Maven](https://maven.apache.org/), выполнить в терминале:
 
 	cd <path-to-project>
 	mvn package
 	mvn exec:java
 
-Also, you can generate project for [Eclipse](https://eclipse.org/):
+Либо, можно сгенерировать проект под [Eclipse](https://eclipse.org/) командой:
 	
 	mvn eclipse:eclipse
+
+Либо, в самом Eclipse, с установленным [m2e](http://www.eclipse.org/m2e/) плагином:
+
+	File > Import > Maven > Existing Maven Project > *выбрать папку с Divider'ом*

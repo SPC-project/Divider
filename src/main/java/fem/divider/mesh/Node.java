@@ -1,7 +1,7 @@
 /*
  * Node.java
  *
- * Created on Monday, 28, March 2005, 18:23
+ * Abstraction point in 
  */
 
 package fem.divider.mesh;
@@ -17,29 +17,17 @@ import fem.geometry.Dot;
 import fem.geometry.DotMaterial;
 import fem.geometry.Triangle;
 
-/**
- * 
- * @author gefox
- * @version
- */
 public class Node extends fem.geometry.Dot {
-   //TODO: make properties private
 	Mesh mesh;
-	
 	List<Element> elements = new ArrayList<Element>(4);
-	private boolean edge = false;
-	boolean valid = true;
+	int index; // index in mesh.nodes
+	fem.divider.figure.Segment segment = null; // segment (if node is on the edge)
+	double offset = 0.0; // offset from the beginning of the segment
 
+	private boolean edge = false;
+	private boolean valid = true;
 	boolean original = false;
 	double originalAngle;
-
-	// index in mesh.nodes
-	int index;
-
-	// segment (if node is on the edge)
-	fem.divider.figure.Segment segment = null;
-	// offset from the beginning of the segment
-	double offset = 0.0;
 	
 	// CZone, this node belongs to
 	fem.divider.figure.CZone czone = null;
@@ -57,44 +45,28 @@ public class Node extends fem.geometry.Dot {
 	// offset from the beginning of the segment
 	private double prevOffset = 0.0;
 
-	
-	public fem.divider.figure.CZone getPrevCzone() {
-		return prevCzone;
-	}
-
-	public void setPrevCzone(fem.divider.figure.CZone prevCzone) {
-		this.prevCzone = prevCzone;
-	}
-
-	public double getPrevCzoneOffset() {
-		return prevCzoneOffset;
-	}
-
-	public void setPrevCzoneOffset(double prevCzoneOffset) {
-		this.prevCzoneOffset = prevCzoneOffset;
-	}
-
-	public fem.divider.figure.Segment getPrevSegment() {
-		return prevSegment;
-	}
-
-	public void setPrevSegment(fem.divider.figure.Segment prevSegment) {
-		this.prevSegment = prevSegment;
-	}
-
-	public double getPrevOffset() {
-		return prevOffset;
-	}
-
-	public void setPrevOffset(double prevOffset) {
-		this.prevOffset = prevOffset;
-	}
-
 	// Node of figure that is original of this node (if it exists)
 	fem.divider.figure.Node figureNode = null;
 	public static Color nodeNumberColor = new Color(0, 0, 175);
 	
-	
+	public fem.divider.figure.CZone   getPrevCzone()        { return prevCzone; }
+	public double                     getPrevCzoneOffset()  { return prevCzoneOffset; }
+	public fem.divider.figure.Segment getPrevSegment()      { return prevSegment; }
+	public double                     getPrevOffset()       { return prevOffset; }
+
+	public void setPrevCzone(fem.divider.figure.CZone prevCzone) {
+		this.prevCzone = prevCzone;
+	}
+	public void setPrevCzoneOffset(double prevCzoneOffset) {
+		this.prevCzoneOffset = prevCzoneOffset;
+	}
+	public void setPrevSegment(fem.divider.figure.Segment prevSegment) {
+		this.prevSegment = prevSegment;
+	}
+	public void setPrevOffset(double prevOffset) {
+		this.prevOffset = prevOffset;
+	}
+
 	/**
 	 * Creates new Node. Adds node to mesh_
 	 */
@@ -106,14 +78,14 @@ public class Node extends fem.geometry.Dot {
 	public Node(Mesh mesh_, double x_, double y_) {
 	   super(x_, y_);
 	   mesh = mesh_;
-      mesh.nodes.add(this);
+	   mesh.nodes.add(this);
 	}
 
 	/**
 	 * Creates new Node Adds node to mesh_
 	 */
 	public Node(Mesh mesh_, Dot dot) {
-		this(mesh_, dot.getX(), dot.getY(), dot.material);
+		this(mesh_, dot.getX(), dot.getY(), dot.getMaterial());
 		if (dot instanceof fem.divider.figure.Node) {
 			fem.divider.figure.Node n1 = (fem.divider.figure.Node) dot;
 			original = true;
@@ -273,6 +245,8 @@ public class Node extends fem.geometry.Dot {
 	 * Add Element
 	 */
 	public void add(Triangle element) {
+		if( this.elements == null )
+			elements = new ArrayList<Element>(4);
 		elements.add((Element) element);
 	}
 
@@ -290,15 +264,15 @@ public class Node extends fem.geometry.Dot {
 	public void draw(Graphics2D g) {
 		MeshPanel panel = mesh.panel;
 		if (czone == null)
-			g.drawOval(panel.xsi(x) - 2, panel.ysi(y) - 2, 4, 4);
+			g.drawOval(panel.xsi(getX()) - 2, panel.ysi(getY()) - 2, 4, 4);
 		else
-			g.drawOval(panel.xsi(x) - 4, panel.ysi(y) - 4, 8, 8);
+			g.drawOval(panel.xsi(getX()) - 4, panel.ysi(getY()) - 4, 8, 8);
 
 		if (fem.divider.Divider.getDivider().getPreferences()
 				.isShowMeshNodeNumbers()) {
 			Color col = g.getColor();
 			g.setPaint(nodeNumberColor);
-			g.drawString((index + 1) + "", panel.xsi(x), panel.ysi(y)); //$NON-NLS-1$
+			g.drawString((index + 1) + "", panel.xsi(getX()), panel.ysi(getY())); //$NON-NLS-1$
 			g.setPaint(col);
 		}
 		drawInfluence(getCzone(), getOffset(), g);
@@ -311,15 +285,15 @@ public class Node extends fem.geometry.Dot {
 		MeshPanel panel = mesh.panel;
 		switch (drawnCzone.getInfluenceMode()) {
 		case CZone.INFLUENCE_CONTACT:
-			g.drawRect(panel.xsi(x) - 4, panel.ysi(y) - 4, 8, 8);
+			g.drawRect(panel.xsi(getX()) - 4, panel.ysi(getY()) - 4, 8, 8);
 			Stroke stroke = g.getStroke();
 			g.setStroke(new BasicStroke(2.0F));
 			if (drawnCzone.isForbidXMotion())
-				g.drawLine(panel.xsi(x), -8 + panel.ysi(y), panel.xsi(x),
-						8 + panel.ysi(y));
+				g.drawLine(panel.xsi(getX()), -8 + panel.ysi(getY()), panel.xsi(getX()),
+						8 + panel.ysi(getY()));
 			if (drawnCzone.isForbidYMotion())
-				g.drawLine(panel.xsi(x) - 8, panel.ysi(y), panel.xsi(x) + 8,
-						panel.ysi(y));
+				g.drawLine(panel.xsi(getX()) - 8, panel.ysi(getY()), panel.xsi(getX()) + 8,
+						panel.ysi(getY()));
 			g.setStroke(stroke);
 			break;
 		case CZone.INFLUENCE_FORCE:
@@ -327,26 +301,26 @@ public class Node extends fem.geometry.Dot {
 			// FORCE, draw an arrow
 			double force[] = drawnCzone.forceDirection(drawnOffset);
 			// arrow line
-			double xw2 = x - force[0] * panel.ww(25),
-			yw2 = y - force[1] * panel.ww(25);
-			g.drawLine(panel.xsi(x), panel.ysi(y), panel.xsi(xw2), panel
+			double xw2 = getX() - force[0] * panel.ww(25),
+			yw2 = getY() - force[1] * panel.ww(25);
+			g.drawLine(panel.xsi(getX()), panel.ysi(getY()), panel.xsi(xw2), panel
 					.ysi(yw2));
 			// arrow hat
 			double force1[] = new double[2];
 			force1[0] = force[0];
 			force1[1] = force[1];
 			Dot.turnVector(force1, 20 * Math.PI / 180);
-			double xa1 = x - force1[0] * panel.ww(10),
-			ya1 = y - force1[1] * panel.ww(10);
-			g.drawLine(panel.xsi(xa1), panel.ysi(ya1), panel.xsi(x), panel
-					.ysi(y));
+			double xa1 = getX() - force1[0] * panel.ww(10),
+			ya1 = getY() - force1[1] * panel.ww(10);
+			g.drawLine(panel.xsi(xa1), panel.ysi(ya1), panel.xsi(getX()), panel
+					.ysi(getY()));
 			force1[0] = force[0];
 			force1[1] = force[1];
 			Dot.turnVector(force1, -20 * Math.PI / 180);
-			xa1 = x - force1[0] * panel.ww(10);
-			ya1 = y - force1[1] * panel.ww(10);
-			g.drawLine(panel.xsi(xa1), panel.ysi(ya1), panel.xsi(x), panel
-					.ysi(y));
+			xa1 = getX() - force1[0] * panel.ww(10);
+			ya1 = getY() - force1[1] * panel.ww(10);
+			g.drawLine(panel.xsi(xa1), panel.ysi(ya1), panel.xsi(getX()), panel
+					.ysi(getY()));
 			if (drawnCzone.getInfluenceMode() == CZone.INFLUENCE_FORCE) {
 				g.drawOval(panel.xsi(xw2) - 2, panel.ysi(yw2) - 2, 4, 4);
 			}
@@ -363,7 +337,6 @@ public class Node extends fem.geometry.Dot {
 		for( Element myEl : elementsCopy ) {
 		   for( Element oppEl = myEl.oppositeOf(this); oppEl != null && oppEl.isInsideCircle(this); oppEl = myEl.oppositeOf(this) )
 		   {
-		      // TODO: do not swap, if some of edges is part of initial inner contour
 		      if (!myEl.swapDiagonalWith(oppEl))
 		         break;
 		   }
@@ -497,6 +470,5 @@ public class Node extends fem.geometry.Dot {
 	public void setCzoneOffset(double czoneOffset) {
 		this.czoneOffset = czoneOffset;
 	}
-
 	
 }// end class Node

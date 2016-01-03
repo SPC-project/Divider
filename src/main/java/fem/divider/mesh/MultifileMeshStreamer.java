@@ -153,7 +153,7 @@ public class MultifileMeshStreamer implements IMeshStreamer {
 		{
 			for(Node node : mesh.nodes)
 			{
-				materialWriter.println(Divider.formatNumberS(node.material.getValue())); 
+				materialWriter.println(Divider.formatNumberS(node.getMaterial().getValue())); 
 			}
 			
 		}
@@ -627,7 +627,6 @@ class ContourNodesCollector
 	 */
 	private Comparator<Node> contourNodesComparator = new Comparator<Node>() {
 
-		@Override
 		public int compare(Node o1, Node o2) {
 			//first sort by segment index
 			if(o1.getSegment().getSegmentIndex() > o2.getSegment().getSegmentIndex())

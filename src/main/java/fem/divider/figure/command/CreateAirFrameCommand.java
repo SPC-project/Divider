@@ -140,7 +140,35 @@ class CreateAirFrameDialog extends AbstractEditingDialog {
          dots.add( new Double[] {x2, y1} );         
       } // Scaled-boundary frame
       else {
-         
+    	  double dist;
+    	  try {
+              dist = Double.parseDouble( distToBoundaries.getText() );
+          } catch(NumberFormatException e) {
+              return distToBoundaries.getText()+Messages.getString("Node._is_not_a_valid_floating-point_number_8");
+          }
+    	  
+    	  // calculate center of the figure
+    	  double centerX = 0.0, centerY = 0.0;
+    	  int nodesCount = 0;
+    	  for( Contour contour : figure.getContours() ){
+    		 for( Node node : contour.nodes ){
+    			 centerX += node.getX();
+    			 centerY += node.getY();
+    			 nodesCount ++;
+    		 }
+    	  }
+    	  centerX /= nodesCount;
+    	  centerY /= nodesCount;
+    	  dots = new ArrayList<Double[]>(nodesCount);
+    	  // make frame
+    	  for( Contour contour : figure.getContours() ){
+     		 for( Node node : contour.nodes ){
+     			 double d = node.distance(centerX, centerY);
+     			 double Sin = (node.getY() - centerY) / d;
+     			 double Cos = (node.getX() - centerX) / d; 
+     			 dots.add( new Double[] {  node.getX() + dist*Cos, node.getY() + dist*Sin  } );
+     		 }
+    	  }
       }
 
       return null;
@@ -172,9 +200,16 @@ class CreateAirFrameDialog extends AbstractEditingDialog {
       boxLike.add(b2);
       
       // Second tab: generate frame as scaled copy of current boundaries 
+      distToBoundaries = new JTextField(15);
+      distToBoundaries.setMaximumSize(distToBoundaries.getPreferredSize());
+      distToBoundaries.setText("15");
+      Box b3 = Box.createHorizontalBox();
+      b3.add(Box.createHorizontalGlue());
+      b3.add(new JLabel("Air zone width:"));
+      b3.add(distToBoundaries);
       scaledBoundary = new JPanel();
       scaledBoundary.setLayout( new BoxLayout(scaledBoundary, BoxLayout.PAGE_AXIS) );
-      scaledBoundary.add(new JLabel("It is incomplete yeut"));
+      scaledBoundary.add(b3);
 
       // Combine tabs
       wayForGenerating.addTab("Box-like", boxLike);
@@ -221,4 +256,5 @@ class CreateAirFrameDialog extends AbstractEditingDialog {
    private JTextField firstY; 
    private JTextField secondX;
    private JTextField secondY;
+   private JTextField distToBoundaries;
 }

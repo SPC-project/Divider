@@ -35,12 +35,12 @@ public class SplitSegmentCommand extends AbstractCommand {
    		double x = ( n1.getX() + n2.getX() ) / 2.0;
    		double y = ( n1.getY() + n2.getY() ) / 2.0;
    		DotMaterial m = DotMaterial.AIR;
-   		if( n1.material == n2.material && n1.material == DotMaterial.FIGURE ){
+   		if( n1.getMaterial() == n2.getMaterial() && n1.getMaterial() == DotMaterial.FIGURE ){
    			m = DotMaterial.FIGURE;
    		}
    		node = new Node(x, y, m);
 	   } else {
-	      node = Node.interactiveCreate( 0.0, 0.0, segment.getEnd().material );
+	      node = Node.interactiveCreate( 0.0, 0.0, segment.getEnd().getMaterial() );
 	   }
 	   
 		if(node==null) return false;

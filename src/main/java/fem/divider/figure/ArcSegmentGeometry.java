@@ -115,7 +115,7 @@ public class ArcSegmentGeometry extends AbstractSegmentGeometry {
 		if(segment.getBegin().distance(segment.getEnd()) < 
 				IFemSettings.GENERAL_ACCURACY){
 			double offset = centerSide == RIGHT_SIDE ? radius :-radius;			
-			return new Dot(segment.getBegin().x+offset, segment.getEnd().y);
+			return new Dot(segment.getBegin().getX()+offset, segment.getEnd().getY());
 		}
 		// coordinates of center in relative (to begin->end vector) system
 		double actualRadius = getActualRadius(segment);
@@ -244,8 +244,8 @@ public class ArcSegmentGeometry extends AbstractSegmentGeometry {
 	public void drawCzone(Segment segment, CZone czone, Graphics2D graphics, FigurePanel panel) {
 		Stroke stroke = graphics.getStroke();
 		graphics.setStroke(new BasicStroke(5.0F));
-		double x1 = segment.getBegin().x;
-		double y1 = segment.getBegin().y;
+		double x1 = segment.getBegin().getX();
+		double y1 = segment.getBegin().getY();
 		double x2 = x1;
 		double y2 = y1;
 
@@ -330,16 +330,16 @@ public class ArcSegmentGeometry extends AbstractSegmentGeometry {
 			theta = beginAngle - shiftAngle;			
 		}
 		
-		double x = center.x + actualRadius*Math.cos(theta) - segment.getBegin().x;
-		double y = center.y + actualRadius*Math.sin(theta) - segment.getBegin().y;
+		double x = center.getX() + actualRadius*Math.cos(theta) - segment.getBegin().getX();
+		double y = center.getY() + actualRadius*Math.sin(theta) - segment.getBegin().getY();
 		
 		return new Dot(x, y);
 	}
 
 	public Dot getDirection(Segment segment, double offset) {
 		Dot dot = shiftDot(segment, offset);
-		dot.x += segment.getBegin().x;
-		dot.y += segment.getBegin().y;
+		dot.setX( dot.getX() + segment.getBegin().getX() );
+		dot.setY( dot.getY() + segment.getBegin().getY() );
 		Dot center = getCenter(segment);
 		double theta = getAngle(center, dot);
 		
@@ -361,17 +361,17 @@ public class ArcSegmentGeometry extends AbstractSegmentGeometry {
 	public RectangleArea calculateBounds(Segment segment) {
 		Dot center = getCenter(segment);
 		double actualRadius = getActualRadius(segment);
-		Dot leftTop = new Dot(center.x-actualRadius, center.y+actualRadius);
-		Dot rightBottom = new Dot(center.x+actualRadius, center.y-actualRadius);
+		Dot leftTop = new Dot(center.getX()-actualRadius, center.getY()+actualRadius);
+		Dot rightBottom = new Dot(center.getX()+actualRadius, center.getY()-actualRadius);
 		
 		return new RectangleArea(leftTop, rightBottom);	
 	}	
 
 	
 	private boolean isIntersectionGood(double xrel, double actualRadius, Dot dotRel, Segment segment, Dot center) {
-		if(dotRel.x>xrel)
+		if(dotRel.getX()>xrel)
 			return false;
-		double yrel = dotRel.y;
+		double yrel = dotRel.getY();
 		Dot intRel = new Dot(xrel, yrel);
 		Dot O = new Dot(0.0, 0.0);
 		Dot X = new Dot(10.0, 0.0);
@@ -390,8 +390,8 @@ public class ArcSegmentGeometry extends AbstractSegmentGeometry {
 			Dot dot) {
 		double actualRadius = getActualRadius(segment);
 		Dot center = getCenter(segment);
-		Dot dotRel = new Dot(dot.x-center.x, dot.y-center.y);
-		double xrel2 = actualRadius*actualRadius - dotRel.y*dotRel.y;
+		Dot dotRel = new Dot(dot.getX()-center.getX(), dot.getY()-center.getY());
+		double xrel2 = actualRadius*actualRadius - dotRel.getY()*dotRel.getY();
 		//if no intersections
 		if(xrel2<0)
 			return 0;

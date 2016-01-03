@@ -10,15 +10,11 @@ import fem.common.IFemSettings;
 
 /**
  * It's a dot on a plane Superclass of Node
- * 
- * @author Paul Lysak
  */
 public class Dot {
-
-    //TODO: make private
-	public double y;
-	public double x;
-	public DotMaterial material;
+	protected double y;
+	protected double x;
+	protected DotMaterial material;
 
 	/**
 	 * Creates new Dot with specified coordinates
@@ -49,7 +45,7 @@ public class Dot {
 	}
 
 	/**
-	 * Calculate distance from this dot to (x_; y_) one
+	 * Calculate distance from this dot to (x_; y_)
 	 */
 	public double distance(double x_, double y_) {
 		return Math.sqrt((x_ - x) * (x_ - x) + (y_ - y) * (y_ - y));
@@ -67,14 +63,7 @@ public class Dot {
 		x = x_;
 		y = y_;
 	}
-
-	/**
-	 * Change material of this dot
-	 * @param material_ - new material
-	 */
-	public void setMaterial(DotMaterial material_){
-		material = material_;
-	}
+	
 	public boolean isFigure(){
 		return material == DotMaterial.FIGURE;
 	}
@@ -348,6 +337,10 @@ public class Dot {
 		return y;
 	}
 
+	public DotMaterial getMaterial() {
+		return material;
+	}
+	
 	/**
 	 * @param d -
 	 *            value, that will be x coordinate of the dot
@@ -363,5 +356,12 @@ public class Dot {
 	public void setY(double d) {
 		y = d;
 	}
-
+	
+	/**
+	 * Change material of this dot
+	 * @param material_ - new material
+	 */
+	public void setMaterial(DotMaterial material_){
+		material = material_;
+	}
 }

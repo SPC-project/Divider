@@ -49,12 +49,12 @@ abstract public class AbstractSegmentGeometry {
 			FigurePanel panel) {
 		if (czone.getInfluenceMode() == CZone.INFLUENCE_NONE)
 			return;
-		double x0 = segment.getBegin().x;
-		double y0 = segment.getBegin().y;
+		double x0 = segment.getBegin().getX();
+		double y0 = segment.getBegin().getY();
 		double x1 = x0;
 		double y1 = y0;
-		double x2 = segment.getEnd().x;
-		double y2 = segment.getEnd().y;
+		double x2 = segment.getEnd().getX();
+		double y2 = segment.getEnd().getY();
 		double czone_offset = czone.getRealOffset();
 		double czone_length = czone.getRealLength();
 		double czone_final_offset = czone_offset + czone_length;
@@ -75,8 +75,7 @@ abstract public class AbstractSegmentGeometry {
 																// marks
 		if (mark_space < IFemSettings.GENERAL_ACCURACY)
 			mark_space = 1.0; // provide correct work with zero length zones
-		double offset, xw, yw, xw2, yw2;
-		double force[];
+		double offset;
 		// LOOP: DRAW SIGNS
 		for (offset = czone_offset; offset <= czone_final_offset
 				+ IFemSettings.GENERAL_ACCURACY; offset += mark_space) {

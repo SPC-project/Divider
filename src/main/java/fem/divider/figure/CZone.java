@@ -143,8 +143,8 @@ public class CZone implements Cloneable {
 	public void drawInfluenceMark(Graphics2D graphics, FigurePanel panel,
 			double offset) {
 		double force[];
-		double x0 = segment.getBegin().x;
-		double y0 = segment.getBegin().y;
+		double x0 = segment.getBegin().getX();
+		double y0 = segment.getBegin().getY();
 		double xw, yw, xw2, yw2;
 		xw = x0 + segment.shift_x(offset);
 		yw = y0 + segment.shift_y(offset);

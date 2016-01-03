@@ -1,6 +1,3 @@
-/*
- * Created on 9/7/2006
- */
 package fem.divider.mesh;
 
 import fem.common.IFemSettings;
@@ -11,11 +8,6 @@ import fem.divider.figure.Contour;
 import fem.divider.figure.Figure;
 import fem.geometry.Triangle;
 
-
-/**
- * @author gefox
- * @author Nikolay Konovalow
- */
 public class MethodRRegular extends MethodAbstract {
 
 	private MethodRRegular() {
@@ -196,24 +188,33 @@ public class MethodRRegular extends MethodAbstract {
 	 * @see divider.mesh.MethodInterface#test(divider.figure.Figure)
 	 */
 	public String test(Figure figure_) {
-		String error_message=Messages.getString("MethodRRegular.Rectangle_required_3");  //$NON-NLS-1$
-		if(figure_.contoursCount()!=1) return error_message;  
-		Contour contour=(Contour)figure_.getContourByIndex(0);
-		if(contour.nodes.size()!=4) return error_message;
-		fem.divider.figure.Node node1, node2, node3, node4;
-		node1=(fem.divider.figure.Node)contour.nodes.get(0);
-		node2=(fem.divider.figure.Node)contour.nodes.get(1);
-		node3=(fem.divider.figure.Node)contour.nodes.get(2);
-		node4=(fem.divider.figure.Node)contour.nodes.get(3);
-		double angle=0.0;
-		angle=node1.angle(node4, node2);
-		if(Math.abs(angle-Math.PI/2)>IFemSettings.GENERAL_ACCURACY) return error_message;
-		angle=node2.angle(node1, node3);
-		if(Math.abs(angle-Math.PI/2)>IFemSettings.GENERAL_ACCURACY) return error_message;
-		angle=node3.angle(node2, node4);
-		if(Math.abs(angle-Math.PI/2)>IFemSettings.GENERAL_ACCURACY) return error_message;
-		angle=node4.angle(node3, node1);
-		if(Math.abs(angle-Math.PI/2)>IFemSettings.GENERAL_ACCURACY) return error_message;
+		for(Contour contour : figure_.getContours() ) {
+			if(contour.nodes.size()!=4) 
+				return Messages.getString("MethodRRegular.Rectangle_required_1");
+
+			fem.divider.figure.Node node1, node2, node3, node4;
+			node1=(fem.divider.figure.Node)contour.nodes.get(0);
+			node2=(fem.divider.figure.Node)contour.nodes.get(1);
+			node3=(fem.divider.figure.Node)contour.nodes.get(2);
+			node4=(fem.divider.figure.Node)contour.nodes.get(3);
+			double angle=0.0;
+
+			angle=node1.angle(node4, node2);
+			if(Math.abs(angle-Math.PI/2)>IFemSettings.GENERAL_ACCURACY) 
+				return Messages.getString("MethodRRegular.Rectangle_required_2");
+
+			angle=node2.angle(node1, node3);
+			if(Math.abs(angle-Math.PI/2)>IFemSettings.GENERAL_ACCURACY)
+				return Messages.getString("MethodRRegular.Rectangle_required_2");
+
+			angle=node3.angle(node2, node4);
+			if(Math.abs(angle-Math.PI/2)>IFemSettings.GENERAL_ACCURACY)
+				return Messages.getString("MethodRRegular.Rectangle_required_2");
+
+			angle=node4.angle(node3, node1);
+			if(Math.abs(angle-Math.PI/2)>IFemSettings.GENERAL_ACCURACY)
+				return Messages.getString("MethodRRegular.Rectangle_required_2");
+		}
 		return null;
 	}//end test(Figure)
 

@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd $( dirname $0 )
-mvn exec:java
+java -jar ./target/*.jar

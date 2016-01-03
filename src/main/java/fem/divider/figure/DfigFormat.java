@@ -290,9 +290,9 @@ public class DfigFormat extends AbstractFormat {
 			// append nodes to contour
 			for( Node node : contour.nodes ) {
 				nodeElement = doc.createElement("Node"); //$NON-NLS-1$
-				nodeElement.setAttribute("x", Double.toString(node.x)); //$NON-NLS-1$
-				nodeElement.setAttribute("y", Double.toString(node.y)); //$NON-NLS-1$
-				nodeElement.setAttribute("material", node.material.name());
+				nodeElement.setAttribute("x", Double.toString(node.getX())); //$NON-NLS-1$
+				nodeElement.setAttribute("y", Double.toString(node.getY())); //$NON-NLS-1$
+				nodeElement.setAttribute("material", node.getMaterial().name());
 
 				Segment segment = node.getNextSegment();
 				// append czones

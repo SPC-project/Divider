@@ -64,6 +64,10 @@ public class Preferences {
 	public boolean isShowMeshNodeNumbers() {
 		return showMeshNodeNumbers;
 	}
+	
+	public boolean isFillFigureElements() {
+		return fillFigureElements;
+	}
 
 	public void setShowMeshElementNumbers(boolean b) {
 		showMeshElementNumbers = b;
@@ -71,6 +75,10 @@ public class Preferences {
 
 	public void setShowMeshNodeNumbers(boolean b) {
 		showMeshNodeNumbers = b;
+	}
+	
+	public void setFillFigureElements(boolean b) {
+		fillFigureElements = b;
 	}
 
 	public int getMeshdownMethodIndex() {
@@ -117,7 +125,8 @@ public class Preferences {
 	private Divider divider;
 	
 	private boolean showMeshNodeNumbers=false; 
-	private boolean showMeshElementNumbers=false; 
+	private boolean showMeshElementNumbers=false;
+	private boolean fillFigureElements=true;
 	private int meshdownMethodIndex=0;
 	
 	

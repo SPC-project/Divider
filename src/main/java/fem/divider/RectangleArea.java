@@ -25,10 +25,10 @@ public class RectangleArea extends AbstractArea{
 		
 		public RectangleArea(Dot corner1, Dot corner2)
 		{
-				left = Math.min(corner1.x, corner2.x);
-				right = Math.max(corner1.x, corner2.x);
-				bottom = Math.min(corner1.y, corner2.y);
-				top = Math.max(corner1.y, corner2.y);
+				left = Math.min(corner1.getX(), corner2.getX());
+				right = Math.max(corner1.getX(), corner2.getX());
+				bottom = Math.min(corner1.getY(), corner2.getY());
+				top = Math.max(corner1.getY(), corner2.getY());
 		}
 		
 		public RectangleArea(RectangleArea area_)
@@ -97,7 +97,7 @@ public class RectangleArea extends AbstractArea{
 		
 		public boolean include(Dot dot)
 		{
-				return include(dot.x, dot.y);
+				return include(dot.getX(), dot.getY());
 		}
 		
 		/**
@@ -149,7 +149,7 @@ public class RectangleArea extends AbstractArea{
 		 *Calculate nearest distance from dot to edge of area
 		 */
 /*		public double distance(Dot dot_) {
-				double x_=dot_.x; double y_=dot_.y;
+				double x_=dot_.getX(); double y_=dot_.getY();
 				double x; double y;
 				boolean x_inside = false;
 				double d;

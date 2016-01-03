@@ -46,6 +46,7 @@ public class DividerUI extends javax.swing.JFrame {
 	
 	private JCheckBoxMenuItem showMENumbers;
 	private JCheckBoxMenuItem showMNNumbers;
+	private JCheckBoxMenuItem fillFigureElements;
 		
 	private JFileChooser fileChooser;
 	private JFileChooser meshFileChooser;
@@ -126,6 +127,8 @@ public class DividerUI extends javax.swing.JFrame {
 		if(divider.getPreferences().isShowMeshElementNumbers()) showMENumbers.setState(true);
 		showMNNumbers = new JCheckBoxMenuItem(Messages.getString("DividerUI.Show_mesh_nodes_numbers_2")); //$NON-NLS-1$
 		if(divider.getPreferences().isShowMeshNodeNumbers()) showMNNumbers.setState(true);
+		fillFigureElements = new JCheckBoxMenuItem(Messages.getString("DividerUI.Fill_figure_elements"));
+		if(divider.getPreferences().isFillFigureElements()) fillFigureElements.setState(true);
 		showMENumbers.addActionListener(
 			new ActionListener()
 			{
@@ -147,7 +150,18 @@ public class DividerUI extends javax.swing.JFrame {
 				}
 			}
 		);//end call showMNNumbers.addActionListener 
-    	
+		
+		fillFigureElements.addActionListener(
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent event)
+					{
+						divider.getPreferences().setFillFigureElements(fillFigureElements.getState());
+						meshPanel.redraw();
+					}
+				}
+		);
+	    	
     	
 		setJMenuBar(menuBar = new JMenuBar());
 		menuBar.add(fileMenu = new JMenu(Messages.getString("DividerUI.File_1"))); //$NON-NLS-1$
@@ -174,6 +188,7 @@ public class DividerUI extends javax.swing.JFrame {
 		viewMenu.addSeparator();
 		viewMenu.add(showMENumbers);
 		viewMenu.add(showMNNumbers);
+		viewMenu.add(fillFigureElements);
 		
 		menuBar.add(meshMenu = new JMenu(Messages.getString("DividerUI.Mesh_4"))); //$NON-NLS-1$
 		meshMenu.add(divider.meshdownAction);

@@ -1,6 +1,3 @@
-/*
- * Created on 9/7/2006
- */
 package fem.divider.mesh;
 
 import java.util.ArrayList;
@@ -16,7 +13,7 @@ import fem.geometry.Triangle;
  */
 public class MethodDefault extends MethodAbstract {
 
-	private MethodDefault() {
+	public MethodDefault() {
 	}
 
 	/* 
@@ -49,12 +46,12 @@ public class MethodDefault extends MethodAbstract {
 	public Mesh meshdown(Figure figure_) {
 		haveExcessiveSquare=true;
 		Mesh mesh = new Mesh();
-		this.mesh = mesh; this.figure=figure_;
+		this.mesh = mesh; 
 		MeshSettings settings_ = figure_.getMeshSettings();
 		mesh.settings=settings_;
 				
 		//make initial triangulation, without adding new Nodes
-		String msg = watson(mesh, figure_);
+		String msg = initial_triangle_dividing(mesh, figure_);
 		if(msg != null)
 		{
 				javax.swing.JOptionPane.showMessageDialog(null, msg, Messages.getString("MethodDefault.Meshdown_failed_3"),  //$NON-NLS-1$
@@ -63,7 +60,7 @@ public class MethodDefault extends MethodAbstract {
 		}
 		excessiveSquare=initialExcessiveSquare=getExcessiveSquare();
 		haveExcessiveSquare=true;
-		upgrade(mesh);
+		divide_triangles(mesh);
 
 		figure_.updateSegmentsIndexes();
 		mesh.sortNodes();
@@ -101,7 +98,7 @@ public class MethodDefault extends MethodAbstract {
 	private static final int DEBUG_LEVEL_NONE = 0;
 	private static final int DEBUG_LEVEL_NOUPGRADE = 1;
 	private static final int DEBUG_LEVEL_NOREMOVE = 2;
-	private static final int DEBUG_LEVEL_EXTREME = 100;
+//	private static final int DEBUG_LEVEL_EXTREME = 100;
 
 //	private static int debugLevel = DEBUG_LEVEL_NOREMOVE;
 //	private static int debugLevel = DEBUG_LEVEL_NOUPGRADE;
@@ -112,7 +109,7 @@ public class MethodDefault extends MethodAbstract {
 	 * Returns error message on failure or null on success
 	 * TODO: nodes with 180 degree angle may produce redundant empty triangle
 	 */
-	private String watson(Mesh mesh, Figure fig)
+	private String initial_triangle_dividing(Mesh mesh, Figure fig)
 	{
 			fem.divider.RectangleArea bounds = fig.calculateBounds();
 			if(bounds==null)
@@ -120,30 +117,19 @@ public class MethodDefault extends MethodAbstract {
 				
 			// Create auxiliary element (triangle), that surrounds our figure
 			// They will add itself to 'mesh' in own constructors
-			Node aux1 = new Node(mesh, bounds.getRight()+bounds.getWidth(),
-					bounds.getBottom()-bounds.getHeight()/2);
-			Node aux2 = new Node(mesh, (bounds.getLeft()+bounds.getRight())/2,
-					bounds.getTop()+bounds.getHeight());
-			Node aux3 = new Node(mesh, bounds.getLeft()-bounds.getWidth(), 
-					bounds.getBottom()-bounds.getHeight()/2);
+			Node aux1 = new Node(mesh, bounds.getRight()+bounds.getWidth(), bounds.getBottom()-bounds.getHeight()/2);
+			Node aux2 = new Node(mesh, (bounds.getLeft()+bounds.getRight())/2, bounds.getTop()+bounds.getHeight());
+			Node aux3 = new Node(mesh, bounds.getLeft()-bounds.getWidth(), bounds.getBottom()-bounds.getHeight()/2);
 			
-			// 'mainEl is not unused'-warning: when constructing, his elements will be added to 'elements' of first 'Node'
-			@SuppressWarnings("unused")
-         Element mainEl = new Element(aux1, aux2, aux3);
-			@SuppressWarnings("unused")
-         fem.divider.figure.Node fnode;
-			@SuppressWarnings("unused")
-         fem.divider.figure.CZMark czmark;
+			mesh.createElement(aux1, aux2, aux3);
 			Node node;
-			@SuppressWarnings("unused")
-         Element el, el1, el2, el3;
+			Element el;
 			
 			//we will use this array of arrays to trace contours (that may be broken or unclosed)
 			ArrayList<ArrayList<Node>> traces = new ArrayList<ArrayList<Node>>(fig.contoursCount());
-			/* At first, create large triangle, that may contain @fig, then add a dot
-			 * 	from @fig and split original triangle to three smaller by this dot.
-			 * Then select next dot, choice triangle, that contains it - and do splitting
-			 * 	on it.
+			/* At first, create large triangle, that certainly contain @fig, then add a dot
+			 *		from @fig and split original triangle to three smaller by this dot.
+			 * Then select next dot, choice triangle, that contains it - and do splitting on it.
 			 */
 			for( Contour contour : fig.getContours() ) {
 					ArrayList<Node> mesh_nodes = new ArrayList<Node>( contour.getNodesAmount() );
@@ -151,13 +137,14 @@ public class MethodDefault extends MethodAbstract {
 					for( Dot dot : contour.getDots() ) {
 							el = mesh.findElementThatCovers(dot);
 							if(el==null)
-								return "Error: found a node (x=" + dot.x + ",y=" + dot.y +") that isn't covered by any element"; //$NON-NLS-1$
+								return "Error: found a node (x=" + dot.getX() + ",y=" + dot.getY() 
+										+ ") that isn't covered by any element"; //$NON-NLS-1$
 							//add new node
 							node = Node.createConditionaly(mesh, dot);
 							//replace old triangle by 3 new
-							el1 = new Element(el.getNodes()[0], el.getNodes()[1], node);
-							el2 = new Element(el.getNodes()[1], el.getNodes()[2], node);
-							el3 = new Element(el.getNodes()[2], el.getNodes()[0], node);
+							mesh.createElement(el.getNodes()[0], el.getNodes()[1], node);
+							mesh.createElement(el.getNodes()[1], el.getNodes()[2], node);
+							mesh.createElement(el.getNodes()[2], el.getNodes()[0], node);
 							el.delete();
 							
 							node.lawson();
@@ -165,27 +152,30 @@ public class MethodDefault extends MethodAbstract {
 					}
 					traces.add( mesh_nodes );
 			}
-			
-			aux1.delete();
-         aux2.delete();
-         aux3.delete();
-         mesh.cleanElements(fig.getContours());
-		
-			// Fix a Contour if it is broken (make sure, that Nodes-neighbors are connected)
-			Node prev, curr;
-			for( ArrayList<Node> nodes : traces ) {
-				if( nodes.size() == 0 ) return "Error: get empty contour";
-				if( nodes.size() == 1 ) continue;
 
-				curr = nodes.get(0);
+			aux1.delete();
+			aux2.delete();
+			aux3.delete();
+			mesh.cleanElements(fig.getContours());	
+			
+			
+			// Fix a Contour if it is broken (make sure, that Nodes-neighbors are connected)
+			Node prev, curr;			
+			for( ArrayList<Node> as_contour : traces ) {		
+				if( as_contour.size() == 0 ) return "Error: get empty contour";
+				if( as_contour.size() == 1 ) continue;
+
+				curr = as_contour.get(0);
 				int i;
-				for( i = 1; i < nodes.size(); i++ ){
+				for( i = 1; i < as_contour.size(); i++ ){
 					prev = curr;
-					curr = nodes.get(i);
+					curr = as_contour.get(i);
+					if( curr.elements == null || prev.elements == null ) // if mesh.cleanElements go wrong
+						mesh.fixUnconnectedNodes( prev, curr, traces );
 					mesh.fixEdge(prev, curr);
 				}
 				if( i > 1 ) {// fix first and last Nodes (not necessary, if they are only two)
-					mesh.fixEdge(curr, nodes.get(0));
+					mesh.fixEdge(curr, as_contour.get(0));
 				}
 			}
 
@@ -195,13 +185,13 @@ public class MethodDefault extends MethodAbstract {
 			}
 			
 			return null;
-	}//end watson
+	}
 	
 	
 	/**
 	 * Divide the figure's area to mesh by adding new nodes  
 	 */
-	private void upgrade(Mesh mesh)
+	private void divide_triangles(Mesh mesh)
 	{
 			if(debugLevel>=DEBUG_LEVEL_NOUPGRADE) {
 				System.out.println("NOTICE: mesh upgrade switched off for debug");
@@ -209,7 +199,6 @@ public class MethodDefault extends MethodAbstract {
 			}
 			Element el;
 			boolean affected;
-			boolean upgraded;
 			double sq1, sqSum;
 			do
 			{
@@ -221,16 +210,15 @@ public class MethodDefault extends MethodAbstract {
 					el = (Element)mesh.elements.get(i);
 					sq1=el.getArea()-mesh.settings.maxArea;//calculate exceeding area
 					if(sq1>0) sqSum+=sq1;
-					upgraded = el.upgrade();
-					if( upgraded ) { //old element was removed, we gona stop earlier
+					if( el.upgrade() ) { //old element was removed, we gonna stop earlier
 					   s--; 
-						affected=true;
-					}
+					   affected=true;
+					}				
 				}//end for all elements
 				excessiveSquare = sqSum;
 			}
 			while(affected);
-	}//end upgrade
+	}//end divide_triangles
 	
 	private double getExcessiveSquare()
 	{
@@ -253,7 +241,6 @@ public class MethodDefault extends MethodAbstract {
 	}
 	
 	private Mesh mesh;
-	private Figure figure;
 	static private MethodDefault methodInstance=null;
 	
 	//these values required to determine progress

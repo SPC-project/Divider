@@ -279,21 +279,19 @@ if( !nod.panel.getWorld().isInside(x,y) )
 	boolean run(Node node_)
 	{
 		node = node_;
-		xField.setText( Double.toString(node.x) );
-		yField.setText( Double.toString(node.y) );
-		materialField.setSelectedItem( material_items[node.material.getValue()] ); 
+		xField.setText( Double.toString(node.getX()) );
+		yField.setText( Double.toString(node.getY()) );
+		materialField.setSelectedItem( material_items[node.getMaterial().getValue()] ); 
 		setVisible(true);
 		return result;
 	}
 
-   @Override
    public void focusGained(FocusEvent e) {
       JTextField caller = (JTextField) e.getComponent();
       if( caller != null )
          caller.selectAll();
    }
 
-   @Override
    public void focusLost(FocusEvent e) {
       // TODO Auto-generated method stub
       
