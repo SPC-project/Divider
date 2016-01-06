@@ -130,10 +130,8 @@ public class MultifileMeshStreamer implements IMeshStreamer {
 			while(i.hasNext())
 			{
 				Node node = i.next();
-				coordsWriter.println(Divider.formatNumberS(node.getX())); 
-				coordsWriter.println(Divider.formatNumberS(node.getY()));
+				coordsWriter.println (Divider.formatNumberS(node.getX()) + " " + Divider.formatNumberS(node.getY()));
 			}
-			
 		}
 		
 		
