@@ -51,7 +51,7 @@ public class MethodDefault extends MethodAbstract {
 		mesh.settings=settings_;
 				
 		//make initial triangulation, without adding new Nodes
-		String msg = initial_triangle_dividing(mesh, figure_);
+		String msg = initial_figure_fragmentizing(mesh, figure_);
 		if(msg != null)
 		{
 				javax.swing.JOptionPane.showMessageDialog(null, msg, Messages.getString("MethodDefault.Meshdown_failed_3"),  //$NON-NLS-1$
@@ -109,7 +109,7 @@ public class MethodDefault extends MethodAbstract {
 	 * Returns error message on failure or null on success
 	 * TODO: nodes with 180 degree angle may produce redundant empty triangle
 	 */
-	private String initial_triangle_dividing(Mesh mesh, Figure fig)
+	private String initial_figure_fragmentizing(Mesh mesh, Figure fig)
 	{
 			fem.divider.RectangleArea bounds = fig.calculateBounds();
 			if(bounds==null)

@@ -144,6 +144,8 @@ public class Mesh {
 		boolean fixEdge(Node thisNode, Node anotherNode)
 		{			
 			Element elOpposite;
+			if( thisNode.elements == null || anotherNode.elements == null )
+				return false;
 			for( Element thisNodeHolder : thisNode.elements )
 			{
 				if( thisNodeHolder.hasNode(anotherNode) ) 
@@ -166,7 +168,7 @@ public class Mesh {
 				thisNode = temp;
 			}
 
-			// Fix half of the gap in the contour by new Element, created on thisNode, anotherNode and nearest to both of them
+			// Fix half of the gap in the contour by new Element, created on 'thisNode', 'anotherNode' and 'nearest' to both of them
 			Node nearest = null;
 			double dist = Double.POSITIVE_INFINITY;
 			double thisDist;
@@ -186,7 +188,8 @@ public class Mesh {
 			}		
 			createElement(thisNode, nearest, anotherNode); 
 			
-			// fix another half of the gap
+			// fix another half of the gap: find such Node, that had Elements with both 'nearest' and 'another_node'
+			Node twin_of_nearest = null;
 			outerLoop:
 			for( Element nearestHolder : nearest.elements ){
 				for( Node candidate : nearestHolder.getNodes() ){
@@ -198,7 +201,7 @@ public class Mesh {
 										if( exist.isSuchElement(anotherNode, candidate, nearest) ) // this element already exist
 											break outerLoop;
 									}
-									createElement( anotherNode, candidate, nearest );
+									twin_of_nearest = candidate;				
 									break outerLoop;
 								}
 							}
@@ -206,6 +209,8 @@ public class Mesh {
 					}
 				}
 			}
+			if( twin_of_nearest != null )
+				createElement( anotherNode, twin_of_nearest, nearest );
 			
 			return false;
 		}
