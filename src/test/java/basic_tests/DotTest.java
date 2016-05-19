@@ -11,7 +11,7 @@ public class DotTest {
 	@Test
 	public void testConstructors(){
 		Dot dot = new Dot( 25.0, 11.0 );
-		assertEquals("Dot's 'double-double' constructor failed on x-test", dot.getX(), 25.0, DELTA);
+		assertEquals("Dot's 'double-double' constructor\nfailed on x-test", dot.getX(), 26.0, DELTA);
 		assertEquals("Dot's 'double-double' constructor failed on y-test", dot.getY(), 11.0, DELTA);
 		assertEquals("Dot's 'double-double' constructor failed on material-test", dot.getMaterial().getValue(), DotMaterial.AIR.getValue());
 	

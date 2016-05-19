@@ -106,6 +106,7 @@ public class MethodDefault extends MethodAbstract {
 	
 	/**
 	 * Makes initial "rough" triangulation (do not add new nodes to @fig)
+	 * Implementation of Bowyer–Watson algorithm
 	 * Returns error message on failure or null on success
 	 * TODO: nodes with 180 degree angle may produce redundant empty triangle
 	 */
@@ -218,7 +219,7 @@ public class MethodDefault extends MethodAbstract {
 				excessiveSquare = sqSum;
 			}
 			while(affected);
-	}//end divide_triangles
+	}
 	
 	private double getExcessiveSquare()
 	{
